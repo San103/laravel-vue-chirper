@@ -45,14 +45,12 @@ class ChirpController extends Controller
             'message' => 'required|string|max:255',
         ]);
 
-        $request->user()->chirps()->create($validated);
-        // dd( $request->user());
+        $chirp = $request->user()->chirps()->create($validated);
+        
+// dd($chirp->id);
         // UsersComment::dispatch(Auth::user()->name, $validated);
-        broadcast(new UsersComment(Auth::user()->name, $validated))->toOthers();
-        // Broadcast::channel('comments', function () use ($validated){
-        //     return $validated;
-        // });
-        //get the id of the inserted chirp
+        broadcast(new UsersComment($request->user(), $chirp))->toOthers();
+     
      
  
         return redirect(route('chirps.index'));

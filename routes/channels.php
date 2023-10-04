@@ -19,6 +19,15 @@ use Illuminate\Support\Facades\Broadcast;
 //     broadcast(new UsersComment($user, $message))->toOthers();
 //     // return true;
 // });
+// Broadcast::routes(['middleware' => ['auth:sanctum']]);
+
+Broadcast::channel('chat.{roomId}', function (User $user, int $roomId) {
+    // if ($user->canJoinRoom($roomId)) {
+        return ['id' => $user->id, 'name' => $user->name];
+    // }
+    // return true;
+});
+
 Broadcast::channel('App.Models.User.{id}', function ($user, $id) {
     return (int) $user->id === (int) $id;
 });

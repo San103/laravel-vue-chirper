@@ -76,34 +76,70 @@ export default{
     },  
     
     mounted() {
-
-        let customId=0;
-        const echo = new Echo({
-            broadcaster: 'pusher',
-            key: '519ed7f2d866445efecf',
-            cluster: 'ap1',
-            forceTLS: true
-        });
-
-       echo.channel('my-channel')
-            .listen('.my-event', function(data) {
-
-            // this.chirps.push({'user': {
-            //     'id' : customId++,
-            //     'name' : data.user,
-            //     'message': data.message.message,
-
-            // }, 
-            //  });
-            // alert(JSON.stringify(data));
-            notification.open({
-                message: `Message from ${data.user}` ,
-                description:
-                `${data.user} says '${data.message.message}'`,
-                icon: () => h(SmileOutlined, { style: 'color: #108ee9' }),
+        // console.log(this.$page.props.auth);
+        if (this.$page.props.auth) {
+            let customId=0;
+            const echo = new Echo({
+                broadcaster: 'pusher',
+                key: '519ed7f2d866445efecf',
+                cluster: 'ap1',
+                forceTLS: true
             });
-            this.test= "tesdsds";
-        });
+            // console.log();
+
+            echo.join(`chat.${this.chirps[0].room_id}`)
+                .here((users) => {
+                    console.log(users);
+                })
+                .joining((user) => {
+                    console.log(user.name);
+                })
+                .leaving((user) => {
+                    console.log(user.name);
+                })
+                .listen('.my-event', function(data) {
+
+                        notification.open({
+                    message: `Message from ${data.user.name}` ,
+                    description:
+                    `${data.user.name} says '${data.message.message}'`,
+                    icon: () => h(SmileOutlined, { style: 'color: #108ee9' }),
+                });
+                })
+                .error((error) => {
+                    console.log(error);
+                });
+        }
+
+       
+    //    echo.join('chat.'+ this.chirps[0].room_id)
+    //         .here((users) => {
+    //             console.log(users);
+    //         })
+    //         .joining((user) => {
+    //             console.log(user.name);
+    //         })
+    //         .leaving((user) => {
+    //             console.log(user.name);
+    //         }
+    //     //     .here('.my-event', function(data) {
+
+    //     //     // this.chirps.push({'user': {
+    //     //     //     'id' : customId++,
+    //     //     //     'name' : data.user,
+    //     //     //     'message': data.message.message,
+
+    //     //     // }, 
+    //     //     //  });
+    //     //     // alert(JSON.stringify(data));
+    //     //     notification.open({
+    //     //         message: `Message from ${data.user}` ,
+    //     //         description:
+    //     //         `${data.user} says '${data.message.message}'`,
+    //     //         icon: () => h(SmileOutlined, { style: 'color: #108ee9' }),
+    //     //     });
+    //     // }
+    //     );
     },
 }
 </script>

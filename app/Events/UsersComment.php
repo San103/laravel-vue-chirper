@@ -18,7 +18,7 @@ use Illuminate\Queue\SerializesModels;
 
 class UsersComment implements ShouldBroadcast
 {
-    use Dispatchable, InteractsWithSockets, SerializesModels;
+    use Dispatchable, SerializesModels;
 
     
     /**
@@ -26,7 +26,7 @@ class UsersComment implements ShouldBroadcast
      */
     // public $message;
     // public $message;
-    public function __construct(public $user, public $message)
+    public function __construct(public User $user, public Chirp $message)
     {
         // $this->dontBroadcastToCurrentUser();
     }
@@ -36,10 +36,13 @@ class UsersComment implements ShouldBroadcast
      *
      * @return array<int, \Illuminate\Broadcasting\Channel>
      */
-    public function broadcastOn(): Channel
+    public function broadcastOn()
   {
-    // dd($message);
-    return new Channel('my-channel');
+    // dd($this->message->room_id);
+    return [
+      new PresenceChannel('chat.'. $this->message->room_id),
+  ];
+    // return new Channel('my-channel');
     
     //   return ['my-channel'];
   }
