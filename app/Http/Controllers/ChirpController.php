@@ -2,8 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\UsersComment;
 use App\Models\Chirp;
 use Illuminate\Http\Request;
+ use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Broadcast;
 use Inertia\Inertia;
 use Illuminate\Http\RedirectResponse;
 
@@ -14,6 +17,10 @@ class ChirpController extends Controller
      */
     public function index()
     {
+        // Broadcast::event('new-message', [
+        //     'message' => 'messagedd',
+        // ]);
+        // UsersComment::dispatch('sd');
         return Inertia::render('Chirps/Index', [
             'chirps' => Chirp::with('user:id,name')->latest()->get(),
         ]);
@@ -32,12 +39,21 @@ class ChirpController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
+
         //
         $validated = $request->validate([
             'message' => 'required|string|max:255',
         ]);
- 
+
         $request->user()->chirps()->create($validated);
+        // dd( $request->user());
+        // UsersComment::dispatch(Auth::user()->name, $validated);
+        broadcast(new UsersComment(Auth::user()->name, $validated))->toOthers();
+        // Broadcast::channel('comments', function () use ($validated){
+        //     return $validated;
+        // });
+        //get the id of the inserted chirp
+     
  
         return redirect(route('chirps.index'));
     }
