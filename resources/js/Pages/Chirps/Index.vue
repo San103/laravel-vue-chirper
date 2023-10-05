@@ -25,7 +25,7 @@ const form = useForm({
                 <InputError :message="form.errors.message" class="mt-2" />
                 <PrimaryButton class="mt-4">Chirp</PrimaryButton>
             </form>
-            <p>{{ test }}</p>
+            <!-- <p>{{ test }}</p> -->
             <!-- <p>{{ chirps }}</p> -->
             <div class="mt-6 bg-white shadow-sm rounded-lg divide-y">
                 <Chirp
@@ -63,6 +63,10 @@ export default{
                  message: '',
             }),
             test: 'Hey',
+            data:{
+                name:'',
+                message:''
+            }
         }
     },
     props:{
@@ -78,37 +82,31 @@ export default{
     mounted() {
         // console.log(this.$page.props.auth);
         if (this.$page.props.auth) {
-            let customId=0;
-            const echo = new Echo({
-                broadcaster: 'pusher',
-                key: '519ed7f2d866445efecf',
-                cluster: 'ap1',
-                forceTLS: true
-            });
+            // const echo = new Echo({
+            //     broadcaster: 'pusher',
+            //     key: '519ed7f2d866445efecf',
+            //     cluster: 'ap1',
+            //     forceTLS: true
+            // });
             // console.log();
 
-            echo.join(`chat.${this.chirps[0].room_id}`)
-                .here((users) => {
-                    console.log(users);
-                })
-                .joining((user) => {
-                    console.log(user.name);
-                })
-                .leaving((user) => {
-                    console.log(user.name);
-                })
+            window.Echo.private(`chat.1`)
+           
                 .listen('.my-event', function(data) {
-
-                        notification.open({
-                    message: `Message from ${data.user.name}` ,
-                    description:
-                    `${data.user.name} says '${data.message.message}'`,
-                    icon: () => h(SmileOutlined, { style: 'color: #108ee9' }),
-                });
+                    // this.test = data.message.message;
+                    // console.log(this.$page.props.chirps);
+                    // this.$page.props.chirps.push({'message': data.message.message, 'user':{ 'name': data.user.name}});
+                    console.log(data);
+                    notification.open({
+                        message: `Message from ${data.user}` ,
+                        description:
+                        `${data.user} says '${data.message}'`,
+                        icon: () => h(SmileOutlined, { style: 'color: #108ee9' }),
+                    });
                 })
-                .error((error) => {
-                    console.log(error);
-                });
+                // .error((error) => {
+                //     console.log(error);
+                // });
         }
 
        
