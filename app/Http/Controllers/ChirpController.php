@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\UserCommentDelete;
 use App\Events\UsersComment;
 use App\Models\Chirp;
 use Illuminate\Http\Request;
@@ -39,18 +40,17 @@ class ChirpController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
-
         //
         $validated = $request->validate([
             'message' => 'required|string|max:255',
         ]);
+        // dd(Chirp::find(1));
+        $chirp = $request->user()->chirp()->create($validated);
 
-        $chirp = $request->user()->chirps()->create($validated);
-        
-// dd($chirp->id);
+
+
         // UsersComment::dispatch(Auth::user()->name, $validated);
-        broadcast(new UsersComment($request->user(), $chirp))->toOthers();
-     
+        broadcast(new UsersComment($request->user(), Chirp::find($chirp->id)))->toOthers();
      
  
         return redirect(route('chirps.index'));
@@ -93,8 +93,13 @@ class ChirpController extends Controller
      */
     public function destroy(Chirp $chirp) : RedirectResponse
     {
+        // dd($chirp);
+        UserCommentDelete::dispatch($chirp);
+
         $this->authorize('delete', $chirp);
- 
+        
+        // dd($chirp);
+
         $chirp->delete();
  
         return redirect(route('chirps.index'));

@@ -12,24 +12,16 @@ use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
-
-
-
-
-class UsersComment implements ShouldBroadcast
+class UserCommentDelete implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
-    
     /**
      * Create a new event instance.
      */
-    // public $message;
-    // public $message;
-    public function __construct(public User $user, public Chirp $message)
+    public function __construct(public Chirp $message)
     {
-      // dd($message);
-        // $this->dontBroadcastToCurrentUser();
+        // dd($message);
     }
 
     /**
@@ -37,25 +29,22 @@ class UsersComment implements ShouldBroadcast
      *
      * @return array<int, \Illuminate\Broadcasting\Channel>
      */
-    public function broadcastOn()
-  {
+    public function broadcastOn(): array
+    {
 
-    return [
-      new PresenceChannel('chat.'. $this->message->chat_room_id),
-  ];
-    // return new Channel('my-channel');
-    
-    //   return ['my-channel'];
-  }
+        // dd($this->message);
+        return [
+            new PrivateChannel('delete.' . $this->message->chat_room_id),
 
-  public function broadcastAs()
+        ];
+    }
+    public function broadcastAs()
   {
-      return 'my-event';
+      return 'delete-event';
   }
   public function broadcastWith(){
     return [
-      'user' =>$this->user->name,
-      'message_id' =>$this->message->id,
+      'user' =>$this->message->id,
       'message' => $this->message->message,
     ];
   }

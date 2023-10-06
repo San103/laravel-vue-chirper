@@ -22,10 +22,18 @@ use Illuminate\Support\Facades\Broadcast;
 // Broadcast::routes(['middleware' => ['auth:sanctum']]);
 
 Broadcast::channel('chat.{roomId}', function (User $user, int $roomId) {
-    // if ($user->canJoinRoom($roomId)) {
-        // return ['id' => $user->id, 'name' => $user->name];
+    // dd(1);
+    if ($user->canJoinRoom($roomId)) {
+        return ['id' => $user->id, 'name' => $user->name];
+    }
+    // return true;
+});
+
+Broadcast::channel('delete.{chatId}', function (User $user, int $chatId) {
+    // if ($user->canDeleteChat($chatId)) {
+        return true;
     // }
-    return true;
+
 });
 
 Broadcast::channel('App.Models.User.{id}', function ($user, $id) {

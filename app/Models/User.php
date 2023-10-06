@@ -43,8 +43,20 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
     ];
-    public function chirps(): HasMany
+    public function chirp(): HasMany
     {
         return $this->hasMany(Chirp::class);
+    }
+
+    public function chatRoom(){
+        return $this->belongsTo(ChatRoom::class);
+    }
+
+    public function canJoinRoom($room_id){
+        return $this->chat_room_id == $room_id;
+    }
+
+    public function canDeleteChat($userId){
+        return $this->id == $userId;
     }
 }

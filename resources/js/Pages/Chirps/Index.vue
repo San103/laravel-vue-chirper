@@ -1,21 +1,33 @@
-<!-- <script setup>
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-import InputError from '@/Components/InputError.vue';
-import PrimaryButton from '@/Components/PrimaryButton.vue';
-import { useForm, Head } from '@inertiajs/vue3';
-import Chirp from '@/Components/Chirp.vue';
- 
-defineProps(['chirps']);
-const form = useForm({
-    message: '',
-});
-</script> -->
- 
 <template>
     <Head title="Chirps" />
  
     <AuthenticatedLayout>
-        <div class="max-w-2xl mx-auto p-4 sm:p-6 lg:p-8">
+        <div class="max-w-3xl mx-auto p-4 sm:p-6 lg:p-8">
+            
+                <div class="w-full p-4 mb-10 bg-white border border-gray-200 rounded-lg shadow sm:p-6 md:p-10 dark:bg-white dark:border-gray-300">
+                    <form class="space-y-3" action="#">
+                        <h5 class="text-xl font-medium text-gray-600 ">Your Name Here</h5>
+                        <div class="flex" :class="$page.props.auth.user.id === chirp.user.id ? 'justify-end' : 'justify-start'" v-for="chirp in chirps" :key="chirp.id">
+                            <div class="flex flex-col">
+                                <div class="flex" :class="$page.props.auth.user.id === chirp.user.id ? 'justify-end' : 'justify-start'">
+                                    <span class="text-sm px-2 py-1.5 text-gray-600">{{chirp.user.name}}</span>
+                                </div>
+                                <span class="p-2 px-4 rounded-full text-sm font-thin" :class="$page.props.auth.user.id === chirp.user.id ? 'dark:text-white bg-blue-600' : ' text-gray-900 border-2 border-gray-400'">{{chirp.message}}</span>
+
+                            </div>
+                        </div>
+                        <!-- <div class="flex justify-start">
+                            <span class="p-3 px-4 rounded-full text-sm font-thin text-gray-900 border-2 border-gray-400 ">Your message here..</span>
+                        </div> -->
+                     
+                        <!-- <div class="text-sm font-medium flex justify-center items-center space-x-6 pt-10">
+                            <input type="text" name="email" id="email" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm pl-4 p-3 rounded-full focus:none focus:border-none w-full " placeholder="Write Something....">
+
+                            <PrimaryButton class="rounded-full">Send</PrimaryButton>
+                        </div> -->
+                    </form>
+                </div>
+
             <form @submit.prevent="submmitForm">
                 <textarea
                     v-model="form.message"
@@ -23,17 +35,20 @@ const form = useForm({
                     class="block w-full border-gray-300 focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 rounded-md shadow-sm"
                 ></textarea>
                 <InputError :message="form.errors.message" class="mt-2" />
-                <PrimaryButton class="mt-4">Chirp</PrimaryButton>
+                <div class="flex justify-end">
+
+                    <PrimaryButton class="mt-4">Send</PrimaryButton>
+                </div>
             </form>
             <!-- <p>{{ test }}</p> -->
             <!-- <p>{{ chirps }}</p> -->
-            <div class="mt-6 bg-white shadow-sm rounded-lg divide-y">
+            <!-- <div class="mt-6 bg-white shadow-sm rounded-lg divide-y">
                 <Chirp
                     v-for="chirp in chirps"
                     :key="chirp.id"
                     :chirp="chirp"
                 />
-            </div>
+            </div> -->
         </div>
     </AuthenticatedLayout>
 </template>
@@ -44,7 +59,6 @@ import InputError from '@/Components/InputError.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import { useForm, Head } from '@inertiajs/vue3';
 import Chirp from '@/Components/Chirp.vue';
-import Echo from 'laravel-echo';
 import { SmileOutlined } from '@ant-design/icons-vue';
 import { notification } from 'ant-design-vue';
 import { h } from 'vue';
@@ -76,27 +90,45 @@ export default{
         submmitForm(){
             // console.log(window.Echo.socketId());
             this.form.post(route('chirps.store'), {onSuccess: () => { this.form.reset()} })
-        }
+        },
+
     },  
     
     mounted() {
-        // console.log(this.$page.props.auth);
-        if (this.$page.props.auth) {
-            // const echo = new Echo({
-            //     broadcaster: 'pusher',
-            //     key: '519ed7f2d866445efecf',
-            //     cluster: 'ap1',
-            //     forceTLS: true
-            // });
-            // console.log();
 
-            window.Echo.private(`chat.1`)
-           
+        // console.log(this.chirps);
+        const appendArray = (data)=> {
+            this.chirps.push({'id':data.message_id, 'message': data.message, 'user': { 'name' : data.user}});
+        };
+        const removeMessage = (data) => {
+            
+            // this.chirps.filter((item) => item.id !== data.user);
+            // const indexToRemove = data.findIndex(item => item.id === idToRemove);
+            const removeMessage = this.chirps.findIndex(item => item.id === data.user);
+
+                if (removeMessage !== -1) {
+                // If the index is found (not -1), use splice to remove the object
+                    this.chirps.splice(removeMessage, 1);
+                }
+        };
+
+        if (this.$page.props.auth) {
+        
+            window.Echo.join(`chat.${this.$page.props.auth.user.chat_room_id}`)
+                .here((users) => {
+                    console.log("Here -"+ users);
+                })
+                .joining((user) => {
+                    console.log("Joining -"+ user.name);
+                })
+                .leaving((user) => {
+                    console.log("Leaving -"+ user.name);
+                })
                 .listen('.my-event', function(data) {
-                    // this.test = data.message.message;
-                    // console.log(this.$page.props.chirps);
-                    // this.$page.props.chirps.push({'message': data.message.message, 'user':{ 'name': data.user.name}});
+                   
                     console.log(data);
+                    appendArray(data);
+
                     notification.open({
                         message: `Message from ${data.user}` ,
                         description:
@@ -104,28 +136,15 @@ export default{
                         icon: () => h(SmileOutlined, { style: 'color: #108ee9' }),
                     });
                 })
-                // .error((error) => {
-                //     console.log(error);
-                // });
+                
+            window.Echo.private(`delete.${this.$page.props.auth.user.chat_room_id}`)
+                .listen('.delete-event', function (data) {
+                    // console.log(data);
+                    removeMessage(data);
+                })
         }
 
-       
-    //    echo.join('chat.'+ this.chirps[0].room_id)
-    //         .here((users) => {
-    //             console.log(users);
-    //         })
-    //         .joining((user) => {
-    //             console.log(user.name);
-    //         })
-    //         .leaving((user) => {
-    //             console.log(user.name);
-    //         }
-    //     //     .here('.my-event', function(data) {
-
-    //     //     // this.chirps.push({'user': {
-    //     //     //     'id' : customId++,
-    //     //     //     'name' : data.user,
-    //     //     //     'message': data.message.message,
+          
 
     //     //     // }, 
     //     //     //  });
