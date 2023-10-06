@@ -28,7 +28,10 @@ Broadcast::channel('chat.{roomId}', function (User $user, int $roomId) {
     }
     // return true;
 });
-
+Broadcast::channel('chatType', function ($user) {
+    // return Auth::check();
+    return true;
+});
 Broadcast::channel('delete.{chatId}', function (User $user, int $chatId) {
     // if ($user->canDeleteChat($chatId)) {
         return true;
