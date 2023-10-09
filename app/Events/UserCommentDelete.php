@@ -35,8 +35,6 @@ class UserCommentDelete implements ShouldBroadcast
         // dd($this->message);
         return [
             new PrivateChannel('delete.' . $this->message->chat_room_id),
-            new PrivateChannel('chatType'),
-
         ];
     }
     public function broadcastAs()

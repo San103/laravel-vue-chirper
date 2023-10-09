@@ -53,6 +53,9 @@
                                 </div>
                             </div>
                         </div>
+                        <div >
+                            <span v-show="typing" class="py-1.5 px-4 rounded-full text-sm font-thin">{{user}} is typing ...</span>
+                        </div>
                         <!-- <div class="flex justify-start">
                             <span class="p-3 px-4 rounded-full text-sm font-thin text-gray-900 border-2 border-gray-400 ">Your message here..</span>
                         </div> -->
@@ -91,15 +94,10 @@
 </template>
 
 <script>
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-import InputError from '@/Components/InputError.vue';
-import Dropdown from '@/Components/Dropdown.vue';
-import DropdownLink from '@/Components/DropdownLink.vue';
-import PrimaryButton from '@/Components/PrimaryButton.vue';
+
 import { useForm, Head } from '@inertiajs/vue3';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
-import Chirp from '@/Components/Chirp.vue';
 import { SmileOutlined } from '@ant-design/icons-vue';
 import { notification } from 'ant-design-vue';
 import { h } from 'vue';
@@ -107,22 +105,13 @@ import { h } from 'vue';
 dayjs.extend(relativeTime);
 
 export default{
-    components: {
-        AuthenticatedLayout,
-        InputError,
-        Dropdown,
-        DropdownLink,
-        PrimaryButton,
-        Chirp,
-
-        Head
-    },
     data() {
         return {
             form: useForm({
                  message: '',
             }),
-            test: 'Hey',
+            typing: false,
+            user: '',
             data:{
                 name:'',
                 message:''
@@ -142,11 +131,17 @@ export default{
             return dayjs(createdAt).fromNow();
         },
         typeMessage(){
-            console.log('test');
-            window.Echo.private(`chatType`)
-            .whisper('.delete-event', {
-                name: 'this.user.name',
-            });
+
+            const userAuth = this.$page.props.auth.user.name;
+
+            let channel = Echo.private('chatType.1');
+
+            setTimeout(function() {
+                channel.whisper('typing', {
+                user: userAuth,
+                typing: true
+                });
+            }, 300);
         }
 
     },  
@@ -171,7 +166,7 @@ export default{
 
         if (this.$page.props.auth) {
         
-            window.Echo.join(`chat.${this.$page.props.auth.user.chat_room_id}`)
+            Echo.join(`chat.${this.$page.props.auth.user.chat_room_id}`)
                 .here((users) => {
                     console.log("Here -"+ users);
                 })
@@ -184,7 +179,7 @@ export default{
                
                 .listen('.my-event', function(data) {
                    
-                    console.log(data);
+                    // console.log(data);
                     appendArray(data);
 
                     notification.open({
@@ -195,15 +190,21 @@ export default{
                     });
                 })
                 
-            window.Echo.private(`delete.${this.$page.props.auth.user.chat_room_id}`)
+           Echo.private(`delete.${this.$page.props.auth.user.chat_room_id}`)
                 .listen('.delete-event', function (data) {
                     // console.log(data);
                     removeMessage(data);
                 })
                
-            window.Echo.private('chatType')
-                .listenForWhisper('.delete-event', (e) => {
-                    console.log(e.name);
+           Echo.private('chatType.1')
+                    .listenForWhisper('typing', (e) => {
+                        this.typing = e.typing,
+                        this.user = e.user,
+
+                        setTimeout(() => {
+                            this.typing = false;
+                            console.log('object');
+                        }, 900);
                 })
                 
         }
