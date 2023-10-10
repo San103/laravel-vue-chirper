@@ -208,7 +208,8 @@ export default {
             Echo.private('chatType.1')
                 .listenForWhisper('typing', (e) => {
                 
-                   
+                   asadsadsadsadsad
+                   afsafasfsfasf
 
                         setTimeout(() => {
                             this.typing = false;
