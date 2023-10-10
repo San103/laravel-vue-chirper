@@ -206,7 +206,8 @@ export default {
                 })
 
             Echo.private('chatType.1')
-                .listenForWhisper('typing', (e) => { Ambot v2
+                .listenForWhisper('typing', (e) => {
+                
                     this.typing = e.typing,
                         this.user = e.user,
 
