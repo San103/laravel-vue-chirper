@@ -192,6 +192,7 @@ export default {
                     appendArray(data);
 
                   afdfssafadf
+                  asdf
                 })
 
             Echo.private(`delete.${this.$page.props.auth.user.chat_room_id}`)
