@@ -11,14 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('chirps', function (Blueprint $table) {
+        Schema::create('chat_rooms', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('chat_room_id')->default(1);
-            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
-            $table->string('message');
+            $table->string('chat_title');
             $table->timestamps();
-
-            $table->foreign('chat_room_id')->references('id')->on('chat_rooms')->onDelete('restrict');
         });
     }
 
@@ -27,6 +23,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('chirps');
+        Schema::dropIfExists('chat_rooms');
     }
 };

@@ -2,8 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\UserCommentDelete;
+use App\Events\UsersComment;
 use App\Models\Chirp;
 use Illuminate\Http\Request;
+ use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Broadcast;
 use Inertia\Inertia;
 use Illuminate\Http\RedirectResponse;
 
@@ -14,8 +18,12 @@ class ChirpController extends Controller
      */
     public function index()
     {
+        // Broadcast::event('new-message', [
+        //     'message' => 'messagedd',
+        // ]);
+        // UsersComment::dispatch('sd');
         return Inertia::render('Chirps/Index', [
-            'chirps' => Chirp::with('user:id,name')->latest()->get(),
+            'chirps' => Chirp::with('user:id,name')->get(),
         ]);
     }
 
@@ -36,8 +44,14 @@ class ChirpController extends Controller
         $validated = $request->validate([
             'message' => 'required|string|max:255',
         ]);
- 
-        $request->user()->chirps()->create($validated);
+        // dd(Chirp::find(1));
+        $chirp = $request->user()->chirp()->create($validated);
+
+
+
+        // UsersComment::dispatch(Auth::user()->name, $validated);
+        broadcast(new UsersComment($request->user(), Chirp::find($chirp->id)))->toOthers();
+     
  
         return redirect(route('chirps.index'));
     }
@@ -79,8 +93,13 @@ class ChirpController extends Controller
      */
     public function destroy(Chirp $chirp) : RedirectResponse
     {
+        // dd($chirp);
+        UserCommentDelete::dispatch($chirp);
+
         $this->authorize('delete', $chirp);
- 
+        
+        // dd($chirp);
+
         $chirp->delete();
  
         return redirect(route('chirps.index'));

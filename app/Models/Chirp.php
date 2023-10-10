@@ -18,4 +18,8 @@ class Chirp extends Model
     {
         return $this->belongsTo(User::class);
     }
+
+    public function chatRoom(){
+        return $this->belongsTo(ChatRoom::class);
+    }
 }

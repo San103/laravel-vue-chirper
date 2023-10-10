@@ -1,5 +1,8 @@
 <?php
 
+use App\Events\UsersComment;
+use App\Models\Chirp;
+use App\Models\User;
 use Illuminate\Support\Facades\Broadcast;
 
 /*
@@ -12,6 +15,28 @@ use Illuminate\Support\Facades\Broadcast;
 | used to check if an authenticated user can listen to the channel.
 |
 */
+// Broadcast::channel('my-channel', function ($user, $message) {
+//     broadcast(new UsersComment($user, $message))->toOthers();
+//     // return true;
+// });
+// Broadcast::routes(['middleware' => ['auth:sanctum']]);
+
+Broadcast::channel('chat.{roomId}', function (User $user, int $roomId) {
+    // dd(1);
+    if ($user->canJoinRoom($roomId)) {
+        return ['id' => $user->id, 'name' => $user->name];
+    }
+    // return true;
+});
+Broadcast::channel('chatType.1', function ($user) {
+    return Auth::check();
+});
+Broadcast::channel('delete.{chatId}', function (User $user, int $chatId) {
+    // if ($user->canDeleteChat($chatId)) {
+        return true;
+    // }
+
+});
 
 Broadcast::channel('App.Models.User.{id}', function ($user, $id) {
     return (int) $user->id === (int) $id;
