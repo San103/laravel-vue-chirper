@@ -191,12 +191,7 @@ export default {
                     // console.log(data);
                     appendArray(data);
 
-                    notification.open({
-                        message: `Message from ${data.user}`,
-                        description:
-                            `${data.user} says '${data.message}'`,
-                        icon: () => h(SmileOutlined, { style: 'color: #108ee9' }),
-                    });
+                  afdfssafadf
                 })
 
             Echo.private(`delete.${this.$page.props.auth.user.chat_room_id}`)
