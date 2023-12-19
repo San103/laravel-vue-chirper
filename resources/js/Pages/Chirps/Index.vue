@@ -191,7 +191,7 @@ export default {
                     // console.log(data);
                     appendArray(data);
 
-                    notification.open({
+                  notification.open({
                         message: `Message from ${data.user}`,
                         description:
                             `${data.user} says '${data.message}'`,
@@ -206,7 +206,8 @@ export default {
                 })
 
             Echo.private('chatType.1')
-                .listenForWhisper('typing', (e) => { Ambot v2
+                .listenForWhisper('typing', (e) => {
+                
                     this.typing = e.typing,
                         this.user = e.user,
 
